@@ -17,4 +17,5 @@ Given a point cloud S of `n` 2D vertices, we implement two greedy approaches in 
 ## Usage
 
 `AreaOptimizer input_file_path` saves minumum/maximum area polygon found
+
 `AreaOptimizer input_file_path solution_file_path` shows saved solution and score S=areaPolygon/areaConvexHull
