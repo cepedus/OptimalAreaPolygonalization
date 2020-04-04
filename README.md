@@ -1,9 +1,3 @@
----
-title: Optimal Area Polygonalization
-created: '2020-02-26T09:26:52.173Z'
-modified: '2020-04-04T13:58:28.682Z'
----
-
 # Optimal Area Polygonalization
 *Course project for INF562 - Computational Geometry from Theory to Applications (2019-2020), École Polytechnique*
 
