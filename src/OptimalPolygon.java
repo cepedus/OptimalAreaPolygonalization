@@ -1,6 +1,4 @@
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map.Entry;
@@ -80,17 +78,21 @@ public class OptimalPolygon {
      * @param polygon  an array storing a permutation of the input points
      * @return area of polygon
      */
-    public float computeArea(int[] polygon) {
+    public long computeArea(int[] polygon) {
     	
-    	float area = 0;
+    	long area = 0;
     	int n = polygon.length;
     	
     	for (int i = 0; i < n; i++)
     	{
-
+    		// Conversion en long pour éviter les erreurs numériques
     		GridPoint_2 p = points[polygon[i]];
     		GridPoint_2 q = points[polygon[(i+1)%n]];
-    		area += (p.x - q.x) * (p.y + q.y);
+    		long px=p.x;
+    		long py=p.y;
+    		long qx=q.x;
+    		long qy=q.y;
+    		area+=(px*qy)-(qx*py);;		
     	}
       
         // Return absolute value 
@@ -136,7 +138,8 @@ public class OptimalPolygon {
     {
     	int n = polygon.size();
     	for(int i = 0; i < n; i++)
-    		if(intersectCedric(s, new Segment(polygon.get(i), polygon.get((i + 1) % n), i)))
+    		//If 100 000 : use intersect2
+    		if(intersect(s, new Segment(polygon.get(i), polygon.get((i + 1) % n), i)))
     			return true;
     	return false;
     }
@@ -149,7 +152,7 @@ public class OptimalPolygon {
      * @return true if they intersect
      */  
     
-    public boolean intersectCedric(Segment s1, Segment s2)
+    public boolean intersect2(Segment s1, Segment s2)
     {
     	GridPoint_2 a=s1.p;
     	GridPoint_2 b=s1.q;
@@ -168,14 +171,14 @@ public class OptimalPolygon {
     	double alphaA=v2y-v1y;
     	double betaA=v1x-v2x;
     	double gammaA=-(alphaA*v1x+betaA*v1y);
-        double calcul1=(alphaA*v3x+betaA*v3y+gammaA)*(alphaA*v4x+betaA*v4y+gammaA);
+//        double calcul1=(alphaA*v3x+betaA*v3y+gammaA)*(alphaA*v4x+betaA*v4y+gammaA);
         if ((alphaA*v3x+betaA*v3y+gammaA)*(alphaA*v4x+betaA*v4y+gammaA)>=0) return false;
         
         //Premier segment de part et d'autre : on fait l'autre test
         double alphaB=v4y-v3y;
         double betaB=v3x-v4x;
         double gammaB=-(alphaB*v3x+betaB*v3y);	
-        double calcul2=(alphaB*v1x+betaB*v1y+gammaB)*(alphaB*v2x+betaB*v2y+gammaB);
+//        double calcul2=(alphaB*v1x+betaB*v1y+gammaB)*(alphaB*v2x+betaB*v2y+gammaB);
         if ((alphaB*v1x+betaB*v1y+gammaB)*(alphaB*v2x+betaB*v2y+gammaB)>=0) return false;
        
         return true;
@@ -257,7 +260,6 @@ public class OptimalPolygon {
      * @return true if polygon passes by all points, if it's a valid permutation and if it doesn't contain self intersections
      */
     public boolean checkValidity(int[] polygon) {
-//    	System.out.println("Checking validity:");
     	
     	int n = this.points.length;
     	
@@ -269,7 +271,6 @@ public class OptimalPolygon {
     			vertices.add(i);
         	if(vertices.size() != n)
         	{
-//        		System.out.println("\tPermutation of edges NOT OK");
         		return false;
         	}
     	}
@@ -277,14 +278,10 @@ public class OptimalPolygon {
     	{
     		if(hasInteriorPoints(polygon))
     		{
-//    			System.out.println("\tInterior points NOT OK");
         		return false;
     		}
     	}  	
-    	 	
-    	
-    	// Check auto-intersections: Shamos-Hoey algorithm TODO
-    	
+    	 	    	
     	// Naive intersection check in O(n^2)
     	n = polygon.length;
     	Segment[] segments = new Segment[n];
@@ -295,16 +292,12 @@ public class OptimalPolygon {
 		{
 			for(int j = 0; j < n; j++)
     		{
-//				if(segments[j].minX() > segments[i].maxX())
-//    				break;
-				if(i != j && intersectCedric(segments[i], segments[j]))
+				if(i != j && intersect2(segments[i], segments[j]))
     			{
-//					System.out.println("\tNo intersections NOT OK");
     				return false;
     			}
     		}
 		}
-//		System.out.println("\t OK");
     	return true;
 		   	
     }
@@ -317,9 +310,9 @@ public class OptimalPolygon {
     	return polygon_array;
     }
     
-    public float areaTriangle(GridPoint_2 p1, GridPoint_2 p2, GridPoint_2 p3)
+    public double areaTriangle(GridPoint_2 p1, GridPoint_2 p2, GridPoint_2 p3)
     {
-    	return (float)(p1.crossD(p2, p3))/2;
+    	return (p1.crossD(p2, p3))/2;
     }
 
     /**
@@ -328,7 +321,7 @@ public class OptimalPolygon {
      * @return  an array of size 'n' storing the computed polygon as a permutation of point indices
      */
     public int[] computeMinimalAreaPolygon() {
-    	System.out.print(".");
+    	System.out.print("Computing a simple polygon of minimal area: ");
     	long startTime=System.nanoTime(), endTime; // for evaluating time performances  	
 
     	int n = points.length;
@@ -358,11 +351,6 @@ public class OptimalPolygon {
     		i++;
     	}
     	
-    	// Force CCW order
-//    	if(P.get(0).cross(P.get(1), P.get(2)) < 0)
-//    		Collections.reverse(P);
-   	
-//    	System.out.println(Arrays.toString(toIndexArray(P)));
     	
     	// Greedy minimal area triangle
     	int not_ok=0; // On s'autorise un nombre maximum d'itération pour éviter les boucles sans fin
@@ -393,7 +381,6 @@ public class OptimalPolygon {
     		if(q != -1)
     		{
     			P.add(r, p0);
-//    	    	System.out.println(Arrays.toString(toIndexArray(P)));
     			S.remove(idx);
     		}
     		else {
@@ -405,13 +392,11 @@ public class OptimalPolygon {
 
     	
     	int[] polygon = toIndexArray(P);
-//    	System.out.println(Arrays.toString(polygon));
-//    	System.out.println(checkValidity(polygon));    	
     	
     	// END ALGO
     	endTime=System.nanoTime();
         double duration=(double)(endTime-startTime)/1000000000.;
-    	//System.out.println("Elapsed time: "+duration+" seconds");
+    	System.out.println("Elapsed time: "+duration+" seconds");
     	
     	return polygon; 
     }
@@ -440,25 +425,15 @@ public class OptimalPolygon {
     		if(!hullIndexes.contains(i))
     			S.add(points[i]);
     	}
-//    	System.out.println(Arra	ys.toString(toIndexArray(P)));
-//    	System.out.println(Arrays.toString(toIndexArray(S)));
     	    	
     	// Delete minimal triangle area at each iteration
-    	int compteur=0;
     	while(S.size() != 0)
     	{
-    		System.out.println(S.size());
-    		compteur++;
-    		if (compteur%100==0)
-    			System.out.print(".");
-    		if (compteur%1000==0)
-    			System.out.println("."+compteur);
-
     		int n_p = P.size();
     		int q = -1;
     		int r = -1;
     		int s = -1;
-    		float min_area = Float.MAX_VALUE;
+    		double min_area = Double.MAX_VALUE;
 
     		for(int s_i = 0; s_i < S.size(); s_i++)
     		{
@@ -468,9 +443,7 @@ public class OptimalPolygon {
         			GridPoint_2 p0 = S.get(s_i);
         			Segment s1 = new Segment(p0, P.get(p_i),0);
         			Segment s2 = new Segment(p0, P.get((p_i + 1) % n_p), 0);
-        			float area_i = areaTriangle(P.get(p_i), p0, P.get((p_i + 1) % n_p));
-        			boolean test1=intersect(s1, P);
-        			boolean test2=intersect(s2,P);
+        			double area_i = areaTriangle(P.get(p_i), p0, P.get((p_i + 1) % n_p));
         			
         			if(Math.abs(area_i) < min_area && !intersect(s1, P) && ! intersect(s2, P))
     				{
@@ -482,7 +455,6 @@ public class OptimalPolygon {
             	}
     		}
         	P.add(r, S.remove(s));
-//        	System.out.println(Arrays.toString(toIndexArray(P)));
     	}
 			
     	int[] polygon = toIndexArray(P);
