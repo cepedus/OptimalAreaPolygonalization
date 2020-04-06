@@ -5,7 +5,9 @@ Martín Cepeda & Cédric Javault
 
 ## Overview
 
-Given a point cloud S of `n` 2D vertices, we implement two greedy approaches in order to approximate the MINimum Area simple Polygonalization and MAXimum Area simple Polygonalization of S (MINAP and MAXAP respectively), an NP-hard problem ([Fekete, 2000](https://doi.org/10.1007/pl00009492)). These two iterative approaches are based in the insertion of minimum area triangles at each step. 
+Given a point cloud S of `n` 2D vertices, we implement two greedy approaches in order to approximate the MINimum Area simple Polygonalization and MAXimum Area simple Polygonalization of S (MINAP and MAXAP respectively), an NP-hard problem ([Fekete, 2000](https://doi.org/10.1007/pl00009492)). These two iterative approaches are based in the insertion of minimum area triangles at each step.
+
+This problem was given at the [CG:SHOP 2019 Competition](https://cgshop.ibr.cs.tu-bs.de/competition/cg-shop-2019/) a year earlier.
 
 ## Requeriments
 
